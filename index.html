@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI游戏推荐 - 智能发现你的下一个爱玩</title>
+  <style>
+  /* General Styles */
+  * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+      overflow-x: hidden;
+    }
+    
+    .app-container {
+      max-width: 414px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: #f8f9fa;
+      box-shadow: 0 0 30px rgba(0,0,0,0.15);
+      position: relative;
+    }
+    
+    /* Header & Tabs */
+    .status-bar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      height: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 16px;
+      font-size: 12px;
+      color: white;
+      font-weight: 500;
+    }
+    
+    .app-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px 20px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .app-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="white" opacity="0.1"/><circle cx="80" cy="40" r="3" fill="white" opacity="0.1"/><circle cx="40" cy="80" r="2" fill="white" opacity="0.1"/></svg>');
+      pointer-events: none;
+    }
+    
+    .header-content {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .header-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      letter-spacing: -0.5px;
+    }
+    
+    .header-subtitle {
+      font-size: 14px;
+      opacity: 0.8;
+      font-weight: 400;
+    }
+    
+    .tab-bar {
+      display: flex;
+      margin: 0;
+      background: white;
+      border-radius: 0;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    
+    .tab-btn {
+      flex: 1;
+      padding: 16px 0;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      background: white;
+      color: #8e8e93;
+      border: none;
+      outline: none;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      position: relative;
+    }
+    
+    .tab-btn.active {
+      color: #667eea;
+    }
+    
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 3px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      border-radius: 2px;
+    }
+    
+    .tab-content {
+      padding: 20px 16px;
+      min-height: calc(100vh - 140px);
+    }
+    
+    /* Cards and Inputs */
+    .card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      margin-bottom: 16px;
+      padding: 20px;
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .card-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #1d1d1f;
+    }
+    
+    .search-container {
+      position: relative;
+      margin-bottom: 16px;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 14px 16px 14px 44px;
+      border: 2px solid #f1f1f1;
+      border-radius: 12px;
+      font-size: 16px;
+      outline: none;
+      transition: all 0.3s ease;
+      background: #fafafa;
+    }
+    
+    .search-input:focus {
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #8e8e93;
+      font-size: 18px;
+    }
+    
+    .search-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .search-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .quick-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    
+    .quick-tag {
+      padding: 8px 12px;
+      background: #f0f0f0;
+      border-radius: 20px;
+      font-size: 13px;
+      color: #666;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .quick-tag:hover {
+      background: #667eea;
+      color: white;
+      transform: translateY(-1px);
+    }
+    
+    /* Recommendation & Analysis Result Styles */
+    .analysis-card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border-left: 4px solid #667eea;
+    }
+    
+    .analysis-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #667eea;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .analysis-desc {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .game-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .game-card {
+      background: white;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      border: 1px solid rgba(0,0,0,0.05);
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .game-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+    
+    .game-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    
+    .game-icon {
+      font-size: 24px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      flex-shrink: 0;
+    }
+    
+    .game-info {
+      flex: 1;
+    }
+    
+    .game-title {
+      font-weight: 600;
+      font-size: 16px;
+      color: #1d1d1f;
+    }
+    
+    .game-desc {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .tag-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 8px;
+    }
+    
+    .tag {
+        padding: 3px 10px;
+        background: linear-gradient(135deg, #e9f0ff, #e6e6fa);
+        color: #667eea;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+        
+    .feedback-container {
+      margin-top: 20px;
+      padding: 16px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      border: 1px solid #e9ecef;
+    }
+    
+    .feedback-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #495057;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    
+    .feedback-buttons {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .feedback-btn {
+      flex: 1;
+      padding: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #dee2e6;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      background: white;
+      color: #495057;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+    
+    .feedback-btn:hover {
+      background: #f1f3f5;
+      border-color: #adb5bd;
+    }
+    
+    .feedback-btn.selected {
+      transform: scale(1.05);
+      font-weight: 700;
+    }
+
+    .feedback-btn.like.selected {
+      background: #e6f9f0;
+      color: #28a745;
+      border-color: #28a745;
+    }
+    
+    .feedback-btn.dislike.selected {
+      background: #fff0f1;
+      color: #dc3545;
+      border-color: #dc3545;
+    }
+    
+    .loading-animation {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 0;
+    }
+    
+    .loading-dots {
+      display: flex;
+      gap: 4px;
+    }
+    
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #667eea;
+      animation: bounce 1.4s infinite ease-in-out;
+    }
+    
+    .dot:nth-child(1) { animation-delay: -0.32s; }
+    .dot:nth-child(2) { animation-delay: -0.16s; }
+    .dot:nth-child(3) { animation-delay: 0s; }
+    
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+      40% { transform: scale(1.2); opacity: 1; }
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #8e8e93;
+    }
+    
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.8;
+    }
+    
+    .empty-text {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    
+    .empty-desc {
+      font-size: 14px;
+      color: #c7c7cc;
+    }
+    
+    .success-message, .error-message {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-top: 16px;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+    }
+    .success-message {
+      background: #e6f9f0;
+      color: #28a745;
+    }
+    .error-message {
+      background: #fff0f1;
+      color: #dc3545;
+    }
+
+    .profile-selector {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #f1f1f1;
+      border-radius: 12px;
+      font-size: 16px;
+      outline: none;
+      background: #fafafa;
+      margin-bottom: 16px;
+    }
+    
+    @media (max-width: 375px) {
+      .tab-content { padding: 16px 12px; }
+      .card { padding: 16px; }
+    }
+    
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="status-bar">
+      <div>9:41</div>
+      <div>AI游戏推荐</div>
+      <div>🔋 100%</div>
+    </div>
+
+    <div class="app-header">
+      <div class="header-content">
+        <div class="header-title">AI游戏推荐</div>
+        <div class="header-subtitle">智能发现你的下一个爱玩</div>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tab1-btn">🎮 智能推荐</button>
+      <button class="tab-btn" id="tab2-btn">📊 偏好分析</button>
+    </div>
+
+    <div class="tab-content" id="tab1-content">
+      <div class="card">
+        <div class="card-title">你玩过什么游戏？</div>
+        <div class="search-container">
+          <div class="search-icon">🔍</div>
+          <input type="text" class="search-input" id="userInput" placeholder="输入游戏名，如“迷你世界”、“原神”">
+        </div>
+        <button class="search-btn" onclick="getRecommendation()">开始推荐</button>
+        <div class="quick-tags">
+          <button class="quick-tag" onclick="quickSearch('蛋仔派对')">🎉 蛋仔派对</button>
+          <button class="quick-tag" onclick="quickSearch('第五人格')">🎭 第五人格</button>
+          <button class="quick-tag" onclick="quickSearch('恋与深空')">💖 恋与深空</button>
+          <button class="quick-tag" onclick="quickSearch('光·遇')">🕊️ 光·遇</button>
+          <button class="quick-tag" onclick="quickSearch('捕鱼大作战')">🐟 捕鱼</button>
+          <button class="quick-tag" onclick="quickSearch('三国杀')">🃏 三国杀</button>
+        </div>
+      </div>
+
+      <div id="recommendResult">
+        <div class="empty-state">
+            <div class="empty-icon">🎮</div>
+            <div class="empty-text">准备好发现新游戏了吗？</div>
+            <div class="empty-desc">输入一款你喜欢的游戏，让我为你量身推荐！</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab2-content" style="display:none;">
+      <div class="card">
+        <div class="card-title">游戏偏好分析</div>
+        <select class="profile-selector" id="profileCase">
+          <option value="guofeng">国风/玄幻/武侠重度RPG玩家</option>
+          <option value="funny">轻松搞怪/解压/策略玩家</option>
+        </select>
+        <button class="search-btn" onclick="showProfileAnalysis()">分析我的偏好</button>
+      </div>
+
+      <div id="profileAnalysis"></div>
+      <div id="profileRecommend"></div>
+    </div>
+  </div>
+
+<script>
+    // --- Tab切换 ---
+    document.getElementById('tab1-btn').onclick = function() {
+      this.classList.add('active');
+      document.getElementById('tab2-btn').classList.remove('active');
+      document.getElementById('tab1-content').style.display = '';
+      document.getElementById('tab2-content').style.display = 'none';
+    };
+    document.getElementById('tab2-btn').onclick = function() {
+      this.classList.add('active');
+      document.getElementById('tab1-btn').classList.remove('active');
+      document.getElementById('tab2-content').style.display = '';
+      document.getElementById('tab1-content').style.display = 'none';
+    };
+
+    // --- 数据源和解析 ---
+    let recommendationData = {};
+    const csvData = `源游戏,推荐游戏,玩法机制,战斗模式,节奏强度,游戏动机,推荐话术,相似度
+捕鱼大作战-畅爽爆金,捕鱼炸翻天-修仙捕鱼,博彩型玩法>捕鱼类,PVE（对环境）>模拟,轻度游戏>轻度,爽感刺激>强回报;解压逃避>节奏可控,喜欢《捕鱼大作战-畅爽爆金》的你，可能也会被《捕鱼炸翻天-修仙捕鱼》吸引，它延续了捕鱼类玩法，并同样满足你对“爽感刺激”的偏好。,1
+捕鱼大作战-畅爽爆金,捕鱼大作战-新赛季,博彩型玩法>捕鱼类,PVE（对环境）>模拟,轻度游戏>轻度,爽感刺激>强回报;解压逃避>节奏可控,喜欢《捕鱼大作战-畅爽爆金》的你，可能也会被《捕鱼大作战-新赛季》吸引，它延续了捕鱼类玩法，并同样满足你对“爽感刺激”的偏好。,1
+捕鱼大作战-畅爽爆金,途游休闲捕鱼-新赛季,博彩型玩法>捕鱼类,PVE（对环境）>模拟,轻度游戏>轻度,爽感刺激>强回报;解压逃避>节奏可控,喜欢《捕鱼大作战-畅爽爆金》的你，可能也会被《途游休闲捕鱼-新赛季》吸引，它延续了捕鱼类玩法，并同样满足你对“爽感刺激”的偏好。,1
+捕鱼大作战-畅爽爆金,猎鱼达人-经典街机捕鱼,博彩型玩法>捕鱼类,PVE（对环境）>模拟,轻度游戏>轻度,爽感刺激>强回报;解压逃避>节奏可控,喜欢《捕鱼大作战-畅爽爆金》的你，可能也会被《猎鱼达人-经典街机捕鱼》吸引，它延续了捕鱼类玩法，并同样满足你对“爽感刺激”的偏好。,1
+捕鱼大作战-畅爽爆金,捕鱼新纪元-超好玩,博彩型玩法>捕鱼类,PVE（对环境）>模拟,轻度游戏>轻度,爽感刺激>强回报;解压逃避>节奏可控,喜欢《捕鱼大作战-畅爽爆金》的你，可能也会被《捕鱼新纪元-超好玩》吸引，它延续了捕鱼类玩法，并同样满足你对“爽感刺激”的偏好。,1
+蛋仔派对,创造与魔法-铠甲勇士二次联动,社交型玩法>UGC创造,非对抗型>建造,轻度游戏>碎片化,创造驱动>沙盒建造型;社交互动>联机协作,喜欢《蛋仔派对》的你，可能也会被《创造与魔法-铠甲勇士二次联动》吸引，它延续了UGC创造玩法，并同样满足你对“创造驱动”的偏好。,0.4015
+蛋仔派对,迷你世界-多人对抗大战场,社交型玩法>UGC创造,非对抗型>建造,轻度游戏>碎片化,创造驱动>UGC编辑器使用者;社交互动>实时互动,喜欢《蛋仔派对》的你，可能也会被《迷你世界-多人对抗大战场》吸引，它延续了UGC创造玩法，并同样满足你对“创造驱动”的偏好。,0.3923
+蛋仔派对,哈利波特：魔法觉醒,策略型玩法>卡牌策略,PVP（对人）>组队竞技,重度游戏>重度,收集成长>图鉴收集;社交互动>群体合作,喜欢《蛋仔派对》的你，可能也会被《哈利波特：魔法觉醒》吸引，它延续了卡牌策略玩法，并同样满足你对“收集成长”的偏好。,0.3731
+蛋仔派对,我的世界：移动版,社交型玩法>UGC创造,非对抗型>建造,轻度游戏>碎片化,创造驱动>沙盒建造型;探索认知>世界探索,喜欢《蛋仔派对》的你，可能也会被《我的世界：移动版》吸引，它延续了UGC创造玩法，并同样满足你对“创造驱动”的偏好。,0.3541
+蛋仔派对,太空杀-首届嘉年华,社交型玩法>狼人杀,PVP（对人）>组队竞技,轻度游戏>轻度,社交互动>狼人杀;探索认知>解谜沉浸,喜欢《蛋仔派对》的你，可能也会被《太空杀-首届嘉年华》吸引，它延续了狼人杀玩法，并同样满足你对“社交互动”的偏好。,0.329
+第五人格-约定的梦幻岛联动,决战！平安京,操作型玩法>即时战斗,PVP（对人）>组队竞技,重度游戏>重度,对抗竞技>技巧挑战;自我认同>成就体现,喜欢《第五人格-约定的梦幻岛联动》的你，可能也会被《决战！平安京》吸引，它延续了即时战斗玩法，并同样满足你对“对抗竞技”的偏好。,0.5031
+第五人格-约定的梦幻岛联动,梦三国-英雄全免费,操作型玩法>即时战斗,PVP（对人）>组队竞技,重度游戏>重度,对抗竞技>技巧挑战;自我认同>成就体现,喜欢《第五人格-约定的梦幻岛联动》的你，可能也会被《梦三国-英雄全免费》吸引，它延续了即时战斗玩法，并同样满足你对“对抗竞技”的偏好。,0.4783
+第五人格-约定的梦幻岛联动,巅峰战舰,操作型玩法>TPS,PVP（对人）>组队竞技,重度游戏>重度,对抗竞技>技巧挑战;自我认同>成就体现,喜欢《第五人格-约定的梦幻岛联动》的你，可能也会被《巅峰战舰》吸引，它延续了TPS玩法，并同样满足你对“对抗竞技”的偏好。,0.4511
+第五人格-约定的梦幻岛联动,巅峰坦克-支持144高帧率,操作型玩法>TPS,PVP（对人）>组队竞技,重度游戏>重度,对抗竞技>技巧挑战;自我认同>成就体现,喜欢《第五人格-约定的梦幻岛联动》的你，可能也会被《巅峰坦克-支持144高帧率》吸引，它延续了TPS玩法，并同样满足你对“对抗竞技”的偏好。,0.4511
+第五人格-约定的梦幻岛联动,机甲战队-6V6战术机甲战斗,操作型玩法>TPS,PVP（对人）>组队竞技,重度游戏>重度,对抗竞技>技巧挑战;自我认同>成就体现,喜欢《第五人格-约定的梦幻岛联动》的你，可能也会被《机甲战队-6V6战术机甲战斗》吸引，它延续了TPS玩法，并同样满足你对“对抗竞技”的偏好。,0.4511
+光·遇,恋与制作人,成长型玩法>RPG养成,非对抗型>社交,轻度游戏>轻度,情感关系>恋爱幻想;沉浸驱动>代入感强,喜欢《光·遇》的你，可能也会被《恋与制作人》吸引，它延续了RPG养成玩法，并同样满足你对“情感关系”的偏好。,0.5571
+光·遇,恋与深空,成长型玩法>RPG养成,非对抗型>社交,中度游戏>中度,情感关系>恋爱幻想;收集成长>角色全收,喜欢《光·遇》的你，可能也会被《恋与深空》吸引，它延续了RPG养成玩法，并同样满足你对“情感关系”的偏好。,0.4802
+光·遇,我本千金,成长型玩法>RPG养成,非对抗型>社交,轻度游戏>轻度,社交互动>情感陪伴型;沉浸驱动>代入感强,喜欢《光·遇》的你，可能也会被《我本千金》吸引，它延续了RPG养成玩法，并同样满足你对“社交互动”的偏好。,0.4221
+光·遇,倩女幽魂,成长型玩法>RPG养成,PVE（对环境）>剧情副本,重度游戏>重度,情感关系>情感连接;探索认知>剧情追踪,喜欢《光·遇》的你，可能也会被《倩女幽魂》吸引，它延续了RPG养成玩法，并同样满足你对“情感关系”的偏好。,0.4025
+光·遇,逆水寒,成长型玩法>RPG养成,PVE（对环境）>剧情副本,重度游戏>重度,情感关系>情感连接;探索认知>剧情追踪,喜欢《光·遇》的你，可能也会被《逆水寒》吸引，它延续了RPG养成玩法，并同样满足你对“情感关系”的偏好。,0.4025
+三国杀,三国杀：一将成名-预约创玩节送武将！,策略型玩法>卡牌策略,PVP（对人）>单挑对抗,中度游戏>中度,对抗竞技>单挑胜负;收集成长>卡牌收集,喜欢《三国杀》的你，可能也会被《三国杀：一将成名-预约创玩节送武将！》吸引，它延续了卡牌策略玩法，并同样满足你对“对抗竞技”的偏好。,0.6637
+三国杀,三国杀名将传-七周年庆典,策略型玩法>卡牌策略,PVP（对人）>单挑对抗,中度游戏>中度,对抗竞技>单挑胜负;收集成长>卡牌收集,喜欢《三国杀》的你，可能也会被《三国杀名将传-七周年庆典》吸引，它延续了卡牌策略玩法，并同样满足你对“对抗竞技”的偏好。,0.6637
+三国杀,三国杀OL互通版,策略型玩法>卡牌策略,PVP（对人）>单挑对抗,中度游戏>中度,对抗竞技>单挑胜负;收集成长>卡牌收集,喜欢《三国杀》的你，可能也会被《三国杀OL互通版》吸引，它延续了卡牌策略玩法，并同样满足你对“对抗竞技”的偏好。,0.6637
+三国杀,奥奇传说-灵绽彼岸,策略型玩法>卡牌策略,PVE（对环境）>副本推图,中度游戏>中度,收集成长>图鉴收集;对抗竞技>排行榜争夺,喜欢《三国杀》的你，可能也会被《奥奇传说-灵绽彼岸》吸引，它延续了卡牌策略玩法，并同样满足你对“收集成长”的偏好。,0.6426
+三国杀,永夜降临：复苏-送龙皓晨,策略型玩法>卡牌策略,PVE（对环境）>副本推图,中度游戏>中度,收集成长>图鉴收集;对抗竞技>排行榜争夺,喜欢《三国杀》的你，可能也会被《永夜降临：复苏-送龙皓晨》吸引，它延续了卡牌策略玩法，并同样满足你对“收集成长”的偏好。,0.6426
+恋与深空,恋与制作人,成长型玩法>RPG养成,非对抗型>社交,轻度游戏>轻度,情感关系>恋爱幻想;沉浸驱动>代入感强,喜欢《恋与深空》的你，可能也会被《恋与制作人》吸引，它延续了RPG养成玩法，并同样满足你对“情感关系”的偏好。,0.6455
+恋与深空,时空中的绘旅人,成长型玩法>RPG养成,非对抗型>剧情,中度游戏>中度,情感关系>恋爱幻想;探索认知>剧情追踪,喜欢《恋与深空》的你，可能也会被《时空中的绘旅人》吸引，它延续了RPG养成玩法，并同样满足你对“情感关系”的偏好。,0.623
+恋与深空,花亦山心之月-国风权谋群像养成手游,成长型玩法>RPG养成,非对抗型>剧情,中度游戏>中度,情感关系>恋爱幻想;探索认知>剧情追踪,喜欢《恋与深空》的你，可能也会被《花亦山心之月-国风权谋群像养成手游》吸引，它延续了RPG养成玩法，并同样满足你对“情感关系”的偏好。,0.623
+恋与深空,未定事件簿-恋爱推理,成长型玩法>RPG养成,非对抗型>剧情,中度游戏>中度,情感关系>恋爱幻想;探索认知>解谜沉浸,喜欢《恋与深空》的你，可能也会被《未定事件簿-恋爱推理》吸引，它延续了RPG养成玩法，并同样满足你对“情感关系”的偏好。,0.5926
+恋与深空,浮生忆玲珑,成长型玩法>回合制战斗,非对抗型>剧情,中度游戏>中度,情感关系>恋爱幻想;探索认知>剧情追踪,喜欢《恋与深空》的你，可能也会被《浮生忆玲珑》吸引，它延续了回合制战斗玩法，并同样满足你对“情感关系”的偏好。,0.5435
+迷你世界-多人对抗大战场,创造与魔法-铠甲勇士二次联动,社交型玩法>UGC创造,非对抗型>建造,轻度游戏>碎片化,创造驱动>沙盒建造型;社交互动>联机协作,喜欢《迷你世界-多人对抗大战场》的你，可能也会被《创造与魔法-铠甲勇士二次联动》吸引，它延续了UGC创造玩法，并同样满足你对“创造驱动”的偏好。,0.689
+迷你世界-多人对抗大战场,我的世界：移动版,社交型玩法>UGC创造,非对抗型>建造,轻度游戏>碎片化,创造驱动>沙盒建造型;探索认知>世界探索,喜欢《迷你世界-多人对抗大战场》的你，可能也会被《我的世界：移动版》吸引，它延续了UGC创造玩法，并同样满足你对“创造驱动”的偏好。,0.6589
+迷你世界-多人对抗大战场,指尖像素城-上线送千抽,策略型玩法>卡牌策略,非对抗型>建造,轻度游戏>轻度,创造驱动>建造;社交互动>联机协作,喜欢《迷你世界-多人对抗大战场》的你，可能也会被《指尖像素城-上线送千抽》吸引，它延续了卡牌策略玩法，并同样满足你对“创造驱动”的偏好。,0.5335
+迷你世界-多人对抗大战场,蛋仔派对,社交型玩法>派对游戏,PVP（对人）>组队竞技,轻度游戏>快节奏,社交互动>群体合作;创造驱动>UGC创造,喜欢《迷你世界-多人对抗大战场》的你，可能也会被《蛋仔派对》吸引，它延续了派对游戏玩法，并同样满足你对“社交互动”的偏好。,0.3923
+迷你世界-多人对抗大战场,三国：冰河时代-解压建造,策略型玩法>SLG,非对抗型>建造,轻度游戏>轻度,创造驱动>建造;解压逃避>日常治愈,喜欢《迷你世界-多人对抗大战场》的你，可能也会被《三国：冰河时代-解压建造》吸引，它延续了SLG玩法，并同样满足你对“创造驱动”的偏好。,0.3432
+`;
+
+    function parseCSV(data) {
+        const lines = data.trim().split('\n');
+        const headers = lines[0].split(',');
+        const result = {};
+
+        for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(',');
+            if (values.length < headers.length) continue; 
+
+            const entry = {};
+            headers.forEach((header, index) => {
+                entry[header.trim()] = values[index] ? values[index].trim() : '';
+            });
+
+            const sourceGame = entry['源游戏'];
+            if (!result[sourceGame]) {
+                result[sourceGame] = [];
+            }
+            result[sourceGame].push(entry);
+        }
+        return result;
+    }
+
+    // --- 核心推荐逻辑 ---
+    function getRecommendation() {
+        const input = document.getElementById('userInput').value.trim();
+        const resultContainer = document.getElementById('recommendResult');
+
+        if (!input) {
+            resultContainer.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">🤔</div>
+                    <div class="empty-text">请输入一个游戏名</div>
+                    <div class="empty-desc">告诉我你喜欢什么，我才能为你推荐呀！</div>
+                </div>`;
+            return;
+        }
+
+        resultContainer.innerHTML = `
+            <div class="loading-animation">
+                <div class="loading-dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>`;
+
+        setTimeout(() => {
+            // **第五人格专项优化**
+            if (input.toLowerCase().includes('第五人格')) {
+                displayIdentityVRecommendations();
+                return;
+            }
+
+            let matchedGameKey = null;
+            const gameKeys = Object.keys(recommendationData);
+            const lowerCaseInput = input.toLowerCase();
+
+            for (const key of gameKeys) {
+                if (key.toLowerCase() === lowerCaseInput) {
+                    matchedGameKey = key;
+                    break;
+                }
+            }
+            if (!matchedGameKey) {
+                for (const key of gameKeys) {
+                    if (key.toLowerCase().includes(lowerCaseInput)) {
+                        matchedGameKey = key;
+                        break;
+                    }
+                }
+            }
+
+            if (matchedGameKey) {
+                const recommendations = recommendationData[matchedGameKey];
+                displayRecommendations(matchedGameKey, recommendations);
+            } else {
+                resultContainer.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">🤷‍♀️</div>
+                    <div class="empty-text">哎呀，没找到“${input}”的相关推荐</div>
+                    <div class="empty-desc">我的数据库还在扩充中，要不试试“蛋仔派对”或“光·遇”？</div>
+                </div>`;
+            }
+        }, 300);
+    }
+
+    function displayIdentityVRecommendations() {
+        let html = `
+        <div class="analysis-card pulse">
+            <div class="analysis-title">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.77-.77-.77a5.4 5.4 0 0 0-7.65 0C2.46 6.5 2 8.6 2 10.5c0 3.6 4.4 6.9 9.1 11.5l.9.9.9-.9c4.7-4.6 9.1-7.9 9.1-11.5 0-1.9-.46-4-2.08-5.92z"></path></svg>
+                <span>基于您对《第五人格》的热爱</span>
+            </div>
+            <div class="analysis-desc">
+                我们发现你钟情于集<b>非对称对抗、哥特式恐怖氛围与策略博弈</b>于一体的独特体验。那种心跳加速的追逃、与队友合作破译的紧张感，正是这类游戏的魅力所在。
+            </div>
+        </div>
+        <div class="game-cards">
+            <div class="game-card">
+                <div class="game-header">
+                    <div class="game-icon">🔪</div>
+                    <div class="game-info"><div class="game-title">黎明杀机 Mobile</div></div>
+                </div>
+                <div class="game-desc"><b>推荐理由：</b>作为非对称对抗玩法的鼻祖，它拥有更写实的恐怖氛围和丰富的角色技能。如果你想体验最原汁原味的追逃，这是不二之选。</div>
+                <div class="tag-group"><span class="tag">核心玩法相似</span><span class="tag">硬核恐怖</span><span class="tag">策略对抗</span></div>
+            </div>
+            <div class="game-card">
+                <div class="game-header">
+                    <div class="game-icon">🤫</div>
+                    <div class="game-info"><div class="game-title">太空杀</div></div>
+                </div>
+                <div class="game-desc"><b>推荐理由：</b>同样强调在压力下的团队合作与背叛。虽然玩法不同，但那种需要推理、欺骗和协作才能“逃出生天”的紧张感是共通的。</div>
+                <div class="tag-group"><span class="tag">团队策略</span><span class="tag">悬疑推理</span><span class="tag">社交互动</span></div>
+            </div>
+            <div class="game-card">
+                <div class="game-header">
+                    <div class="game-icon">👻</div>
+                    <div class="game-info"><div class="game-title">The Past Within</div></div>
+                </div>
+                <div class="game-desc"><b>推荐理由：</b>来自锈湖系列，主打双人合作解谜。如果你喜欢《第五人格》中与朋友合作破译密码机的部分，这款游戏能带来纯粹的合作解谜乐趣和独特的诡异氛围。</div>
+                <div class="tag-group"><span class="tag">合作解谜</span><span class="tag">诡异氛围</span><span class="tag">双人游戏</span></div>
+            </div>
+             <div class="game-card">
+                <div class="game-header">
+                    <div class="game-icon">🃏</div>
+                    <div class="game-info"><div class="game-title">月圆之夜</div></div>
+                </div>
+                <div class="game-desc"><b>推荐理由：</b>如果你着迷于《第五人格》的哥特童话美术风格，这款单机卡牌游戏能为你提供一个同样黑暗、神秘且充满故事性的世界。</div>
+                <div class="tag-group"><span class="tag">哥特风格</span><span class="tag">卡牌策略</span><span class="tag">剧情丰富</span></div>
+            </div>
+        </div>
+        `;
+        document.getElementById('recommendResult').innerHTML = html;
+    }
+
+
+    function displayRecommendations(sourceGame, recommendations) {
+        const sourceGameClean = sourceGame.split('-')[0];
+        const firstRec = recommendations[0];
+        const mainMechanic = firstRec['玩法机制'].split('>')[1] || firstRec['玩法机制'].split('>')[0];
+        const mainMotivation = firstRec['游戏动机'].split(';')[0].split('>')[1] || firstRec['游戏动机'].split(';')[0].split('>')[0];
+        
+        let html = `
+        <div class="analysis-card pulse">
+            <div class="analysis-title">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.77-.77-.77a5.4 5.4 0 0 0-7.65 0C2.46 6.5 2 8.6 2 10.5c0 3.6 4.4 6.9 9.1 11.5l.9.9.9-.9c4.7-4.6 9.1-7.9 9.1-11.5 0-1.9-.46-4-2.08-5.92z"></path></svg>
+                <span>基于您对《${sourceGameClean}》的喜爱</span>
+            </div>
+            <div class="analysis-desc">
+                我们发现你很享受<b>${mainMechanic}</b>类游戏带来的乐趣，特别是对<b>“${mainMotivation}”</b>这类体验情有独钟。因此，我们为您挑选了以下几款游戏。
+            </div>
+        </div>
+        <div class="game-cards">
+        `;
+
+        const icons = ['🎭', '🕯️', '🔍', '👥', '🚀'];
+
+        recommendations.forEach((rec, index) => {
+            const mechanics = rec['玩法机制'].split('>');
+            const motivation = rec['游戏动机'].split(';')[0].split('>');
+
+            html += `
+            <div class="game-card">
+                <div class="game-header">
+                    <div class="game-icon">${icons[index % icons.length]}</div>
+                    <div class="game-info">
+                        <div class="game-title">${rec['推荐游戏']}</div>
+                    </div>
+                </div>
+                <div class="game-desc">
+                    <b>推荐理由：</b>${rec['推荐话术'].replace(`喜欢《${rec['源游戏']}》的你，可能也会被《${rec['推荐游戏']}》吸引，`, '这款游戏')}
+                </div>
+                <div class="tag-group">
+                    <span class="tag">${mechanics[1] || mechanics[0]}</span>
+                    <span class="tag">${rec['节奏强度'].split('>')[0]}</span>
+                    <span class="tag">${motivation[0]}</span>
+                </div>
+            </div>
+            `;
+        });
+
+        html += `</div>
+        <div class="feedback-container">
+            <div class="feedback-title">这次推荐还满意吗？</div>
+            <div class="feedback-buttons">
+                <button class="feedback-btn like" onclick="handleFeedback('like', this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                    <span>超赞</span>
+                </button>
+                <button class="feedback-btn dislike" onclick="handleFeedback('dislike', this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path></svg>
+                    <span>不太行</span>
+                </button>
+            </div>
+        </div>
+        `;
+
+        document.getElementById('recommendResult').innerHTML = html;
+    }
+
+    function handleFeedback(type, element) {
+      const allButtons = element.parentElement.querySelectorAll('.feedback-btn');
+      allButtons.forEach(btn => btn.classList.remove('selected'));
+      element.classList.add('selected');
+      
+      const container = element.closest('.tab-content');
+      const existingMessage = container.querySelector('.success-message, .error-message');
+      if (existingMessage) {
+        existingMessage.remove();
+      }
+
+      let message = '';
+      if (type === 'like') {
+        message = '<div class="success-message">感谢您的认可，很高兴能帮到你！</div>';
+      } else if (type === 'dislike') {
+        message = '<div class="error-message">收到您的反馈，我们将持续优化推荐！</div>';
+      }
+      
+      container.querySelector('.feedback-container').insertAdjacentHTML('afterend', message);
+    }
+    
+    function quickSearch(tag) {
+      document.getElementById('userInput').value = tag;
+      getRecommendation();
+    }
+
+    document.getElementById('userInput').addEventListener('keydown', function(e){
+      if(e.key === 'Enter') {
+        e.preventDefault();
+        getRecommendation();
+      }
+    });
+
+    // --- 偏好分析模块 ---
+    function showProfileAnalysis() {
+      const val = document.getElementById('profileCase').value;
+      let analysis = '', recommend = '';
+      if (val === 'guofeng') {
+        analysis = `
+          <div class="analysis-card">
+            <div class="analysis-title">🎯 题材偏好分析</div>
+            <div class="tag-group">
+                <span class="tag">国风/仙侠</span>
+                <span class="tag">三国</span>
+                <span class="tag">幻想RPG</span>
+            </div>
+            <p class="analysis-desc" style="margin-top:12px;">你偏好东方文化背景、古风美术、神话或武侠题材，喜欢沉浸感强、角色设定鲜明的世界观。</p>
+          </div>
+          <div class="analysis-card">
+            <div class="analysis-title">⚔️ 玩法偏好分析</div>
+            <div class="tag-group">
+                <span class="tag">MMO/ARPG</span>
+                <span class="tag">策略/SLG</span>
+                <span class="tag">福利驱动</span>
+            </div>
+            <p class="analysis-desc" style="margin-top:12px;">你喜欢中重度RPG，乐于角色养成、刷副本、参与战斗，也喜欢策略搭配和活动福利。</p>
+          </div>
+        `;
+        recommend = `
+          <div class="game-cards" style="margin-top: 16px;">
+            <div class="game-card">
+              <div class="game-header">
+                <div class="game-icon">👹</div>
+                <div class="game-info"><div class="game-title">阴阳师</div></div>
+              </div>
+              <div class="game-desc"><b>亮点：</b>顶级国风美术与音乐，深度剧情，丰富式神收集与养成。</div>
+            </div>
+            <div class="game-card">
+              <div class="game-header">
+                <div class="game-icon">🗡️</div>
+                <div class="game-info"><div class="game-title">仙剑世界</div></div>
+              </div>
+              <div class="game-desc"><b>亮点：</b>经典IP，沉浸式剧情，开放世界探索，丰富副本与社交。</div>
+            </div>
+          </div>
+        `;
+      } else if (val === 'funny') {
+        analysis = `
+          <div class="analysis-card">
+            <div class="analysis-title">🎯 题材&风格偏好</div>
+            <div class="tag-group">
+                <span class="tag">轻松解压</span>
+                <span class="tag">搞怪幽默</span>
+                <span class="tag">策略塔防</span>
+            </div>
+            <p class="analysis-desc" style="margin-top:12px;">你喜欢轻松、搞笑、操作简单的游戏，偏好有趣的物理模拟、策略但不烧脑、节奏适中。</p>
+          </div>
+          <div class="analysis-card">
+            <div class="analysis-title">⚔️ 玩法偏好</div>
+            <div class="tag-group">
+                <span class="tag">沙雕物理</span>
+                <span class="tag">塔防策略</span>
+                <span class="tag">创意模拟</span>
+            </div>
+            <p class="analysis-desc" style="margin-top:12px;">你喜欢物理模拟、塔防、轻策略等玩法，享受解压和搞怪体验。</p>
+          </div>
+        `;
+        recommend = `
+          <div class="game-cards" style="margin-top: 16px;">
+            <div class="game-card">
+                <div class="game-header">
+                    <div class="game-icon">🦢</div>
+                    <div class="game-info"><div class="game-title">无名鹅作祟</div></div>
+                </div>
+                <div class="game-desc"><b>亮点：</b>你扮演一只鹅，到处恶作剧，爆笑解压，支持多人合作。</div>
+            </div>
+            <div class="game-card">
+                <div class="game-header">
+                    <div class="game-icon">🧑‍🤝‍🧑</div>
+                    <div class="game-info"><div class="game-title">人类一败涂地</div></div>
+                </div>
+                <div class="game-desc"><b>亮点：</b>Q弹角色解谜闯关，支持多人，沙雕物理，笑到抽筋。</div>
+            </div>
+          </div>
+        `;
+      }
+      document.getElementById('profileAnalysis').innerHTML = analysis;
+      document.getElementById('profileRecommend').innerHTML = recommend;
+    }
+
+    // 页面加载时自动解析数据
+    window.onload = function() {
+        recommendationData = parseCSV(csvData);
+    };
+  </script>
+</body>
+</html>
